@@ -5,7 +5,7 @@ using RealEstateSystem.Application.Interfaces;
 namespace RealEstateSystem.Api.Controllers
 {
     [ApiController]
-    [Route("api/vi/[controller]")]
+    [Route("api/v1/[controller]")]
     public class AuthenController : ControllerBase
     {
         private readonly IAuthenService _authenService;
@@ -133,32 +133,6 @@ namespace RealEstateSystem.Api.Controllers
             catch (Exception)
             {
                 return StatusCode(500, new { Message = "Đã xảy ra lỗi hệ thống trong quá trình đổi mật khẩu." });
-            }
-        }
-
-        [Microsoft.AspNetCore.Authorization.Authorize]
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetProfile(CancellationToken cancellationToken)
-        {
-            try
-            {
-                var userIdClaim = User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub) 
-                                  ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-                if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-                {
-                    return Unauthorized(new { Message = "Yêu cầu xác thực không hợp lệ." });
-                }
-
-                var result = await _authenService.GetProfileAsync(userId, cancellationToken);
-                return Ok(result);
-            }
-            catch (ArgumentException exception)
-            {
-                return BadRequest(new { Message = exception.Message });
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { Message = "Đã xảy ra lỗi hệ thống trong quá trình lấy thông tin tài khoản." });
             }
         }
     }

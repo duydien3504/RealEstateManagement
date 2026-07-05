@@ -1,13 +1,13 @@
 using RealEstateSystem.Application.DTOs.Response;
 using RealEstateSystem.Application.Interfaces;
 
-namespace RealEstateSystem.Application.Services.AuthenService
+namespace RealEstateSystem.Application.Services.ProfileService
 {
-    public class ProfileService
+    public class GetProfileService
     {
         private readonly IUserRepository _userRepository;
 
-        public ProfileService(IUserRepository userRepository)
+        public GetProfileService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }
