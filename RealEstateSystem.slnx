@@ -1,3 +1,7 @@
 <Solution>
-  <Project Path="RealEstateSystem/RealEstateSystem.csproj" />
+  <Project Path="RealEstateSystem.Api/RealEstateSystem.Api.csproj" />
+  <Project Path="RealEstateSystem.Application/RealEstateSystem.Application.csproj" />
+  <Project Path="RealEstateSystem.Domain/RealEstateSystem.Domain.csproj" />
+  <Project Path="RealEstateSystem.EmailWorker/RealEstateSystem.EmailWorker.csproj" />
+  <Project Path="RealEstateSystem.Infrastructure/RealEstateSystem.Infrastructure.csproj" />
 </Solution>

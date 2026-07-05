@@ -43,3 +43,13 @@ secrets.json
 # =========================
 .DS_Store
 Thumbs.db
+
+# =========================
+# IDEs & Editors
+# =========================
+.vscode/
+*.code-workspace
+
+
+AGENTS.md
+DATABASE.md

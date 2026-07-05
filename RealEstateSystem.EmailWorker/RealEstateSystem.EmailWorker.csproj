@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-RealEstateSystem.EmailWorker-38a8c178-98ae-4cbe-aa5c-0f02e19fff5b</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RealEstateSystem.Application\RealEstateSystem.Application.csproj" />
+    <ProjectReference Include="..\RealEstateSystem.Infrastructure\RealEstateSystem.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
