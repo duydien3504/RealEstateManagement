@@ -11,6 +11,5 @@ namespace RealEstateSystem.Application.Interfaces
         Task<ForgetPasswordResponse> ForgetPasswordAsync(ForgetPasswordRequest request, CancellationToken cancellationToken);
         Task<VerifyChangePasswordResponse> VerifyChangePasswordAsync(VerifyChangePasswordRequest request, string otp, CancellationToken cancellationToken);
         Task<ChangePasswordResponse> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken);
-        Task<UserProfileResponse> GetProfileAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

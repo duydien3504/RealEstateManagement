@@ -12,7 +12,6 @@ namespace RealEstateSystem.Application.Services.AuthenService
         private readonly ForgetPasswordService _forgetPasswordService;
         private readonly VerifyChangePasswordService _verifyChangePasswordService;
         private readonly ChangePasswordService _changePasswordService;
-        private readonly ProfileService _profileService;
 
         public AuthenService(
             RegisterService registerService,
@@ -20,8 +19,7 @@ namespace RealEstateSystem.Application.Services.AuthenService
             VerifyOtpService verifyOtpService,
             ForgetPasswordService forgetPasswordService,
             VerifyChangePasswordService verifyChangePasswordService,
-            ChangePasswordService changePasswordService,
-            ProfileService profileService)
+            ChangePasswordService changePasswordService)
         {
             _registerService = registerService;
             _loginService = loginService;
@@ -29,7 +27,6 @@ namespace RealEstateSystem.Application.Services.AuthenService
             _forgetPasswordService = forgetPasswordService;
             _verifyChangePasswordService = verifyChangePasswordService;
             _changePasswordService = changePasswordService;
-            _profileService = profileService;
         }
 
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
@@ -60,11 +57,6 @@ namespace RealEstateSystem.Application.Services.AuthenService
         public async Task<ChangePasswordResponse> ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken)
         {
             return await _changePasswordService.ChangePasswordAsync(userId, request, cancellationToken);
-        }
-
-        public async Task<UserProfileResponse> GetProfileAsync(Guid userId, CancellationToken cancellationToken)
-        {
-            return await _profileService.GetProfileAsync(userId, cancellationToken);
         }
     }
 }

@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using RealEstateSystem.Api.Extensions;
 using RealEstateSystem.Application.Interfaces;
 using RealEstateSystem.Application.Services.AuthenService;
+using RealEstateSystem.Application.Services.ProfileService;
 using RealEstateSystem.Application.Validators;
 using RealEstateSystem.Infrastructure.Messaging;
 using RealEstateSystem.Infrastructure.Repository;
@@ -94,8 +95,12 @@ namespace RealEstateSystem.Api
             builder.Services.AddScoped<ForgetPasswordService>();
             builder.Services.AddScoped<VerifyChangePasswordService>();
             builder.Services.AddScoped<ChangePasswordService>();
-            builder.Services.AddScoped<ProfileService>();
             builder.Services.AddScoped<IAuthenService, AuthenService>();
+            builder.Services.AddScoped<GetProfileService>();
+            builder.Services.AddScoped<UpdateProfileService>();
+            builder.Services.AddScoped<DeleteProfileService>();
+            builder.Services.AddScoped<IProfileService, ProfileService>();
+            builder.Services.AddScoped<IEncryptEmail, HmacEncrypt>();
             builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
             builder.Services.AddEndpointsApiExplorer();
