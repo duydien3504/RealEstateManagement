@@ -10,6 +10,7 @@ namespace RealEstateSystem.Domain.Entity
         public OtpPurpose Purpose { get; set; }
         public DateTime ExpiredAt { get; set; }
         public bool IsUsed { get; set; }
+        public DateTime? VerifiedAt { get; set; }
         public DateTime CreatedAt { get; set; }
 
         public User User { get; set; } = null!;

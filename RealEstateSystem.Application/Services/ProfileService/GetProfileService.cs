@@ -1,5 +1,6 @@
 using RealEstateSystem.Application.DTOs.Response;
 using RealEstateSystem.Application.Interfaces;
+using RealEstateSystem.Domain.Exceptions;
 
 namespace RealEstateSystem.Application.Services.ProfileService
 {
@@ -17,7 +18,7 @@ namespace RealEstateSystem.Application.Services.ProfileService
             var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
             if (user == null)
             {
-                throw new ArgumentException("Tài khoản không tồn tại.");
+                throw new NotFoundException("Tài khoản không tồn tại.");
             }
 
             return new UserProfileResponse

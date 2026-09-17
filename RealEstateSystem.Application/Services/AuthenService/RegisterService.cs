@@ -1,9 +1,11 @@
+using Microsoft.Extensions.Logging;
 using RealEstateSystem.Application.DTOs.Mail;
 using RealEstateSystem.Application.DTOs.Request;
 using RealEstateSystem.Application.DTOs.Response;
 using RealEstateSystem.Application.Interfaces;
 using RealEstateSystem.Domain.Entity;
 using RealEstateSystem.Domain.Enums;
+using RealEstateSystem.Domain.Exceptions;
 
 namespace RealEstateSystem.Application.Services.AuthenService
 {
@@ -13,6 +15,7 @@ namespace RealEstateSystem.Application.Services.AuthenService
         private readonly IHasherPassword _passwordHasher;
         private readonly IRedisCacheService _redisCacheService;
         private readonly IMessagePublisher _messagePublisher;
+        private readonly ILogger<RegisterService> _logger;
 
         private const string OtpEmailQueueName = "otp-email-queue";
         private const int OtpExpiryMinutes = 5;
@@ -21,12 +24,14 @@ namespace RealEstateSystem.Application.Services.AuthenService
             IUserRepository userRepository,
             IHasherPassword passwordHasher,
             IRedisCacheService redisCacheService,
-            IMessagePublisher messagePublisher)
+            IMessagePublisher messagePublisher,
+            ILogger<RegisterService> logger)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
             _redisCacheService = redisCacheService;
             _messagePublisher = messagePublisher;
+            _logger = logger;
         }
 
         public async Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
@@ -34,7 +39,8 @@ namespace RealEstateSystem.Application.Services.AuthenService
             var emailExists = await _userRepository.CheckExistEmailAsync(request.Email, cancellationToken);
             if (emailExists)
             {
-                throw new ArgumentException("Email này đã được sử dụng trong hệ thống.");
+                _logger.LogWarning("Đăng ký thất bại: Email {Email} đã được sử dụng.", request.Email);
+                throw new BadRequestException("Email này đã được sử dụng trong hệ thống.");
             }
 
             var roleId = await _userRepository.GetRoleIdByRoleTypeAsync(RoleType.User, cancellationToken);
@@ -54,9 +60,7 @@ namespace RealEstateSystem.Application.Services.AuthenService
                 Email = request.Email,
                 PasswordHash = passwordHash,
                 Status = StatusType.Inactive,
-                IsDeleted = false,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                IsDeleted = false
             };
 
             var rawOtpCode = new Random().Next(100000, 999999).ToString();
@@ -90,6 +94,8 @@ namespace RealEstateSystem.Application.Services.AuthenService
             };
 
             await _messagePublisher.PublishAsync(OtpEmailQueueName, emailMessage, cancellationToken);
+
+            _logger.LogInformation("Người dùng {Email} đã đăng ký tài khoản thành công với ID {UserId}.", user.Email, user.UserId);
 
             return new RegisterResponse
             {

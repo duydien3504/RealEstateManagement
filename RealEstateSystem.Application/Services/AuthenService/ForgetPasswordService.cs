@@ -4,6 +4,7 @@ using RealEstateSystem.Application.DTOs.Response;
 using RealEstateSystem.Application.Interfaces;
 using RealEstateSystem.Domain.Entity;
 using RealEstateSystem.Domain.Enums;
+using RealEstateSystem.Domain.Exceptions;
 
 namespace RealEstateSystem.Application.Services.AuthenService
 {
@@ -34,7 +35,7 @@ namespace RealEstateSystem.Application.Services.AuthenService
             var user = await _userRepository.GetUserByEmailWithRoleAsync(request.Email, cancellationToken);
             if (user == null || user.IsDeleted || user.Status == StatusType.Deleted)
             {
-                throw new ArgumentException("Email không tồn tại trong hệ thống.");
+                throw new NotFoundException("Email không tồn tại trong hệ thống.");
             }
 
             var rawOtpCode = new Random().Next(100000, 999999).ToString();

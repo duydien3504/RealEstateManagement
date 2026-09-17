@@ -1,16 +1,20 @@
+using Microsoft.Extensions.Logging;
 using RealEstateSystem.Application.DTOs.Request;
 using RealEstateSystem.Application.DTOs.Response;
 using RealEstateSystem.Application.Interfaces;
+using RealEstateSystem.Domain.Exceptions;
 
 namespace RealEstateSystem.Application.Services.ProfileService
 {
     public class UpdateProfileService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UpdateProfileService> _logger;
 
-        public UpdateProfileService(IUserRepository userRepository)
+        public UpdateProfileService(IUserRepository userRepository, ILogger<UpdateProfileService> logger)
         {
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         public async Task<UpdateProfileResponse> UpdateProfileAsync(Guid userId, UpdateProfileRequest request, CancellationToken cancellationToken)
@@ -18,14 +22,17 @@ namespace RealEstateSystem.Application.Services.ProfileService
             var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken);
             if (user == null)
             {
-                throw new ArgumentException("Tài khoản không tồn tại.");
+                _logger.LogWarning("Cập nhật thông tin thất bại: Tài khoản với ID {UserId} không tồn tại.", userId);
+                throw new NotFoundException("Tài khoản không tồn tại.");
             }
 
+            var oldFullName = user.FullName;
             user.FullName = request.FullName;
-            user.UpdatedAt = DateTime.UtcNow;
 
             await _userRepository.UpdateUserAsync(user, cancellationToken);
             await _userRepository.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Người dùng {Email} (ID: {UserId}) đã cập nhật FullName từ '{OldName}' thành '{NewName}'.", user.Email, user.UserId, oldFullName, request.FullName);
 
             var updatedProfile = new UserProfileResponse
             {
@@ -46,3 +53,4 @@ namespace RealEstateSystem.Application.Services.ProfileService
         }
     }
 }
+

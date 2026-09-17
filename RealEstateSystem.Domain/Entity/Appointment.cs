@@ -1,8 +1,9 @@
+using RealEstateSystem.Domain.Common;
 using RealEstateSystem.Domain.Enums;
 
 namespace RealEstateSystem.Domain.Entity
 {
-    public class Appointment
+    public class Appointment : AuditableEntity
     {
         public Guid AppointmentId { get; set; }
         public Guid UserId { get; set; }
@@ -11,8 +12,6 @@ namespace RealEstateSystem.Domain.Entity
         public TimeSpan AppointmentTime { get; set; }
         public AppointmentStatus Status { get; set; }
         public string? RejectReason { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
 
         public User User { get; set; } = null!;
         public Property Property { get; set; } = null!;

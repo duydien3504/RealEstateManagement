@@ -1,8 +1,9 @@
+using RealEstateSystem.Domain.Common;
 using RealEstateSystem.Domain.Enums;
 
 namespace RealEstateSystem.Domain.Entity
 {
-    public class User
+    public class User : SoftDeleteEntity
     {
         public Guid UserId { get; set; }
         public Guid RoleId { get; set; }
@@ -11,10 +12,7 @@ namespace RealEstateSystem.Domain.Entity
         public string PasswordHash { get; set; } = string.Empty;
         public StatusType Status { get; set; }
         public string? AvatarUrl { get; set; }
-        public bool IsDeleted { get; set; }
         public DateTime? LastLogin { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
 
         public Role Role { get; set; } = null!;
 
@@ -27,5 +25,7 @@ namespace RealEstateSystem.Domain.Entity
         public ICollection<PropertyReport> PropertyReports { get; set; } = new List<PropertyReport>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+        public Wallet? Wallet { get; set; }
     }
 }

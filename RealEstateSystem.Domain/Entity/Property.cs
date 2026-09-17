@@ -1,8 +1,9 @@
+using RealEstateSystem.Domain.Common;
 using RealEstateSystem.Domain.Enums;
 
 namespace RealEstateSystem.Domain.Entity
 {
-    public class Property
+    public class Property : SoftDeleteEntity
     {
         public Guid PropertyId { get; set; }
         public Guid OwnerId { get; set; }
@@ -21,9 +22,6 @@ namespace RealEstateSystem.Domain.Entity
         public DateTime? ExpiredAt { get; set; }
         public int ViewCount { get; set; }
         public int FavoriteCount { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
 
         public User Owner { get; set; } = null!;
         public Category Category { get; set; } = null!;
@@ -35,5 +33,6 @@ namespace RealEstateSystem.Domain.Entity
         public ICollection<PropertyRating> PropertyRatings { get; set; } = new List<PropertyRating>();
         public ICollection<PropertyReport> PropertyReports { get; set; } = new List<PropertyReport>();
         public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public ICollection<PropertyPayment> PropertyPayments { get; set; } = new List<PropertyPayment>();
     }
 }

@@ -4,6 +4,7 @@ namespace RealEstateSystem.Domain.Enums
     {
         Pending,
         Approved,
-        Rejected
+        Rejected,
+        Cancelled
     }
 }

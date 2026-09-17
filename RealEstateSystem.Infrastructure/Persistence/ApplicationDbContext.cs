@@ -27,11 +27,38 @@ namespace RealEstateSystem.Infrastructure.Persistence
         public DbSet<PropertyReport> PropertyReports { get; set; } = null!;
         public DbSet<Appointment> Appointments { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<Transaction> Transactions { get; set; } = null!;
+        public DbSet<OwnerUpgradePayment> OwnerUpgradePayments { get; set; } = null!;
+        public DbSet<Wallet> Wallets { get; set; } = null!;
+        public DbSet<WalletTransaction> WalletTransactions { get; set; } = null!;
+        public DbSet<PropertyPayment> PropertyPayments { get; set; } = null!;
+        public DbSet<ChatRoom> ChatRooms { get; set; } = null!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker
+                .Entries()
+                .Where(e => e.Entity is Domain.Common.AuditableEntity && (e.State == EntityState.Added || e.State == EntityState.Modified));
+
+            foreach (var entityEntry in entries)
+            {
+                var entity = (Domain.Common.AuditableEntity)entityEntry.Entity;
+                entity.UpdatedAt = DateTime.UtcNow;
+
+                if (entityEntry.State == EntityState.Added)
+                {
+                    entity.CreatedAt = DateTime.UtcNow;
+                }
+            }
+
+            return base.SaveChangesAsync(cancellationToken);
         }
     }
 }

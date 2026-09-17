@@ -39,8 +39,9 @@ namespace RealEstateSystem.Infrastructure.Services
             message.Subject = subject;
             message.Body = new TextPart("html") { Text = body };
 
+            var socketOptions = smtpPort == 465 ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
             using var smtpClient = new SmtpClient();
-            await smtpClient.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls, cancellationToken);
+            await smtpClient.ConnectAsync(smtpHost, smtpPort, socketOptions, cancellationToken);
             await smtpClient.AuthenticateAsync(smtpUsername, smtpPassword, cancellationToken);
             await smtpClient.SendAsync(message, cancellationToken);
             await smtpClient.DisconnectAsync(true, cancellationToken);

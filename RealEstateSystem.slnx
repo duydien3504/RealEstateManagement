@@ -4,4 +4,5 @@
   <Project Path="RealEstateSystem.Domain/RealEstateSystem.Domain.csproj" />
   <Project Path="RealEstateSystem.EmailWorker/RealEstateSystem.EmailWorker.csproj" />
   <Project Path="RealEstateSystem.Infrastructure/RealEstateSystem.Infrastructure.csproj" />
+  <Project Path="RealEstateSystem.Application.UnitTests/RealEstateSystem.Application.UnitTests.csproj" />
 </Solution>

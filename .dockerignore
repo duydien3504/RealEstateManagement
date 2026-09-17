@@ -1,0 +1,59 @@
+# ==============================================================================
+# Docker Ignore File (.dockerignore)
+# Loại bỏ các file rác, file build, các file chứa key/cấu hình nhạy cảm khỏi Docker image
+# ==============================================================================
+
+# --- File chứa Key, Chứng chỉ & Cấu hình Nhạy Cảm (Bảo mật) ---
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.p12
+**/*.cer
+**/*.crt
+**/*.pub
+**/*secret*.json
+**/secrets.json
+**/client_secrets.json
+**/service-account.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/*_rsa*
+**/*_ed25519*
+
+# --- File cấu hình của Cloud / Deployment Keys ---
+**/.aws/
+**/.azure/
+**/.gcloud/
+**/.kube/
+
+# --- File Build và Output của .NET (Tối ưu hóa tốc độ build) ---
+**/bin/
+**/obj/
+**/publish/
+**/out/
+
+# --- File cấu hình IDE / Editor ---
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/*.userosscache
+**/*.sln.docstates
+
+# --- File quản lý mã nguồn (Git) ---
+**/.git
+**/.gitignore
+**/.gitattributes
+
+# --- Các file Docker tự thân (Không cần thiết đưa vào container) ---
+**/Dockerfile
+**/docker-compose*
+**/.dockerignore
+
+# --- Log files & Temporary files ---
+**/*.log
+**/tmp/
+**/temp/

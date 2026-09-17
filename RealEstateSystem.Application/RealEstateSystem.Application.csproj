@@ -1,15 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\RealEstateSystem.Domain\RealEstateSystem.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\ProfileService\" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
   </ItemGroup>
 
   <PropertyGroup>

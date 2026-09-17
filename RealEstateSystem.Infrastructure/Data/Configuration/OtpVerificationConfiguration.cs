@@ -13,7 +13,7 @@ namespace RealEstateSystem.Infrastructure.Data.Configuration
             builder.HasKey(o => o.OtpId);
 
             builder.Property(o => o.OtpCode)
-                .HasMaxLength(6)
+                .HasMaxLength(200)
                 .IsRequired();
 
             builder.Property(o => o.Purpose)

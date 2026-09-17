@@ -1,20 +1,15 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
-using RabbitMQ.Client;
 using RealEstateSystem.Api.Extensions;
-using RealEstateSystem.Application.Interfaces;
-using RealEstateSystem.Application.Services.AuthenService;
-using RealEstateSystem.Application.Services.ProfileService;
+using RealEstateSystem.Api.Middlewares;
+using RealEstateSystem.Application;
 using RealEstateSystem.Application.Validators;
-using RealEstateSystem.Infrastructure.Messaging;
-using RealEstateSystem.Infrastructure.Repository;
-using RealEstateSystem.Infrastructure.Security;
-using RealEstateSystem.Infrastructure.Services;
+using RealEstateSystem.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using StackExchange.Redis;
+using RealEstateSystem.Api.Hubs;
 
 namespace RealEstateSystem.Api
 {
@@ -24,7 +19,24 @@ namespace RealEstateSystem.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDatabase(builder.Configuration);
+            builder.Services.AddApplicationServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
+            builder.Services.AddSignalR();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins(
+                              "http://localhost:3000",
+                              "https://realestate.hugonef.id.vn",
+                              "http://realestate.hugonef.id.vn"
+                          )
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
 
             builder.Services.AddControllers(options =>
             {
@@ -51,6 +63,20 @@ namespace RealEstateSystem.Api
                     ValidAudience = builder.Configuration["Jwt:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chatHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
             builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -60,48 +86,6 @@ namespace RealEstateSystem.Api
 
             builder.Services.AddFluentValidationAutoValidation();
             builder.Services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
-
-            var redisConnectionString = builder.Configuration["Redis:ConnectionString"]
-                ?? throw new InvalidOperationException("Cấu hình Redis:ConnectionString không tồn tại.");
-
-            builder.Services.AddSingleton<IConnectionMultiplexer>(
-                ConnectionMultiplexer.Connect(redisConnectionString));
-
-            var rabbitHost = builder.Configuration["RabbitMq:Host"] ?? "localhost";
-            var rabbitPort = int.Parse(builder.Configuration["RabbitMq:Port"] ?? "5672");
-            var rabbitUsername = builder.Configuration["RabbitMq:Username"] ?? "guest";
-            var rabbitPassword = builder.Configuration["RabbitMq:Password"] ?? "guest";
-
-            builder.Services.AddSingleton<IConnection>(serviceProvider =>
-            {
-                var factory = new ConnectionFactory
-                {
-                    HostName = rabbitHost,
-                    Port = rabbitPort,
-                    UserName = rabbitUsername,
-                    Password = rabbitPassword
-                };
-                return factory.CreateConnectionAsync().GetAwaiter().GetResult();
-            });
-
-            builder.Services.AddScoped<IHasherPassword, PasswordHasher>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
-            builder.Services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
-            builder.Services.AddTransient<IMailService, SmtpMailService>();
-            builder.Services.AddScoped<RegisterService>();
-            builder.Services.AddScoped<LoginService>();
-            builder.Services.AddScoped<VerifyOtpService>();
-            builder.Services.AddScoped<ForgetPasswordService>();
-            builder.Services.AddScoped<VerifyChangePasswordService>();
-            builder.Services.AddScoped<ChangePasswordService>();
-            builder.Services.AddScoped<IAuthenService, AuthenService>();
-            builder.Services.AddScoped<GetProfileService>();
-            builder.Services.AddScoped<UpdateProfileService>();
-            builder.Services.AddScoped<DeleteProfileService>();
-            builder.Services.AddScoped<IProfileService, ProfileService>();
-            builder.Services.AddScoped<IEncryptEmail, HmacEncrypt>();
-            builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -134,15 +118,19 @@ namespace RealEstateSystem.Api
 
             var app = builder.Build();
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
+            app.UseCors("AllowFrontend");
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.MapHub<ChatHub>("/chatHub");
             app.MapControllers();
 
             app.Run();

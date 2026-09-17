@@ -44,6 +44,7 @@ namespace RealEstateSystem.Infrastructure.Repository
         {
             return await _context.OtpVerifications
                 .Include(o => o.User)
+                    .ThenInclude(u => u.Wallet)
                 .Where(o => o.User.Email == email)
                 .OrderByDescending(o => o.CreatedAt)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -70,9 +71,80 @@ namespace RealEstateSystem.Infrastructure.Repository
             await _context.OtpVerifications.AddAsync(otpVerification, cancellationToken);
         }
 
+        public async Task AddTransactionAsync(Transaction transaction, CancellationToken cancellationToken)
+        {
+            await _context.Transactions.AddAsync(transaction, cancellationToken);
+        }
+
+        public async Task AddOwnerUpgradePaymentAsync(OwnerUpgradePayment ownerUpgradePayment, CancellationToken cancellationToken)
+        {
+            await _context.OwnerUpgradePayments.AddAsync(ownerUpgradePayment, cancellationToken);
+        }
+
+        public async Task<Transaction?> GetTransactionByCodeAsync(string transactionCode, CancellationToken cancellationToken)
+        {
+            return await _context.Transactions
+                .Include(t => t.OwnerUpgradePayment)
+                    .ThenInclude(oup => oup!.OwnerProfileRequest)
+                .FirstOrDefaultAsync(t => t.TransactionCode == transactionCode, cancellationToken);
+        }
+
+        public async Task<OwnerProfileRequest?> GetLatestPendingOwnerProfileRequestAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return await _context.OwnerProfileRequests
+                .Where(o => o.UserId == userId && o.Status == OwnerProfileRequestStatus.Pending)
+                .OrderByDescending(o => o.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task AddOwnerProfileRequestAsync(OwnerProfileRequest request, CancellationToken cancellationToken)
+        {
+            await _context.OwnerProfileRequests.AddAsync(request, cancellationToken);
+        }
+
+        public async Task<List<User>> GetAllUsersAsync(CancellationToken cancellationToken)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Where(u => !u.IsDeleted)
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _context.Database.BeginTransactionAsync(cancellationToken);
+        }
+
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        {
+            if (_context.Database.CurrentTransaction != null)
+            {
+                await _context.Database.CurrentTransaction.CommitAsync(cancellationToken);
+            }
+        }
+
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        {
+            if (_context.Database.CurrentTransaction != null)
+            {
+                await _context.Database.CurrentTransaction.RollbackAsync(cancellationToken);
+            }
+        }
+
         public async Task SaveChangesAsync(CancellationToken cancellationToken)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                foreach (var entry in ex.Entries)
+                {
+                    System.Console.WriteLine($"[CONCURRENCY ERROR] Entity: {entry.Entity.GetType().Name}, State: {entry.State}");
+                }
+                throw;
+            }
         }
     }
 }

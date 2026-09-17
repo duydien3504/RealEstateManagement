@@ -55,6 +55,8 @@ namespace RealEstateSystem.Infrastructure.Data.Configuration
             builder.Property(p => p.IsDeleted)
                 .HasDefaultValue(false);
 
+            builder.HasQueryFilter(p => !p.IsDeleted);
+
             builder.HasOne(p => p.Owner)
                 .WithMany(u => u.Properties)
                 .HasForeignKey(p => p.OwnerId)
